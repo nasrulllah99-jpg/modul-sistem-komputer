@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengenalan Dasar Sistem Komputer - Informatika Kelas VII SMP/MTs</title>
+
+  <!-- Tailwind CSS CDN (butuh internet) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/tailwind-config.js"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- CSS kustom -->
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-800 font-sans min-h-screen flex flex-col items-center justify-center p-0 md:p-4 selection:bg-brand-500 selection:text-white transition-all duration-300">
+
+  <!-- Toggle mode tampilan (desktop) -->
+  <div class="hidden md:flex items-center justify-between w-full max-w-md mb-2 px-3 py-1.5 bg-slate-800/90 backdrop-blur-md rounded-2xl border border-slate-700 text-xs text-slate-300">
+    <span class="flex items-center gap-1.5 font-medium">
+      <i class="fas fa-mobile-screen-button text-brand-400"></i> Mode Simulasi Mobile Learning
+    </span>
+    <button onclick="toggleFrameMode()" id="frame-toggle-btn" class="bg-brand-600 hover:bg-brand-500 text-white px-2.5 py-1 rounded-xl text-[11px] font-semibold transition flex items-center gap-1.5">
+      <i class="fas fa-expand" id="frame-toggle-icon"></i>
+      <span id="frame-toggle-text">Layar Penuh</span>
+    </button>
+  </div>
+
+  <!-- Bingkai aplikasi mobile -->
+  <div id="app-shell" class="w-full md:max-w-md bg-slate-50 md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col h-screen md:h-[820px] relative border-0 md:border-[8px] border-slate-800 transition-all duration-300">
+
+    <!-- Status bar -->
+    <div id="mobile-status-bar" class="hidden md:flex bg-slate-800 text-white text-[11px] px-6 py-1.5 justify-between items-center z-50">
+      <span class="font-semibold" id="clock">09:41</span>
+      <div class="w-16 h-3.5 bg-slate-950 rounded-full"></div>
+      <div class="flex items-center space-x-1.5">
+        <i class="fas fa-signal"></i>
+        <i class="fas fa-wifi"></i>
+        <i class="fas fa-battery-full"></i>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-brand-600 via-brand-700 to-accent-600 text-white px-4 py-3 shadow-md sticky top-0 z-40 flex items-center justify-between">
+      <div class="flex items-center space-x-2.5">
+        <div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center font-bold text-lg border border-white/30 shadow-inner">
+          <i class="fas fa-desktop text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-display font-bold text-sm leading-tight tracking-wide">Sistem Komputer VII</h1>
+          <p class="text-[11px] text-brand-100 flex items-center gap-1.5">
+            <span>Informatika SMP/MTs</span>
+            <span>•</span>
+            <span class="bg-white/20 text-[10px] px-1.5 py-0.2 rounded-full font-semibold" id="header-progress-badge">0% Selesai</span>
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-1.5">
+        <button onclick="toggleRefModal()" class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition" title="Sumber & Referensi">
+          <i class="fas fa-book-bookmark text-white text-xs"></i>
+        </button>
+        <button onclick="toggleHelpModal()" class="w-8 h-8 rounded-xl bg-white/15 hover:bg-white/25 flex items-center justify-center transition" title="Petunjuk Penggunaan">
+          <i class="fas fa-circle-question text-white text-sm"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Progress bar -->
+    <div class="w-full bg-slate-200 h-1.5 z-30">
+      <div id="main-progress-bar" class="bg-gradient-to-r from-emerald-400 via-brand-500 to-accent-500 h-1.5 w-0 transition-all duration-500"></div>
+    </div>
+
+    <!-- Audio narasi -->
+    <div class="bg-slate-900 text-white px-4 py-2 flex items-center justify-between text-xs border-b border-slate-800">
+      <div class="flex items-center space-x-2.5 overflow-hidden">
+        <button id="audio-play-btn" onclick="toggleAudioNarration()" class="w-7 h-7 rounded-full bg-brand-500 hover:bg-brand-400 flex items-center justify-center text-white shrink-0 shadow transition">
+          <i class="fas fa-play text-[10px] ml-0.5" id="audio-play-icon"></i>
+        </button>
+        <div class="truncate">
+          <span class="block font-bold text-[11px] text-brand-200 leading-tight truncate" id="audio-topic-title">Narasi Suara: Beranda Modul</span>
+          <span class="text-[10px] text-slate-400 block truncate" id="audio-status-text">Ketuk Play untuk mendengarkan narasi</span>
+        </div>
+      </div>
+      <div id="audio-visualizer" class="flex items-center space-x-0.5 h-4 opacity-30 shrink-0 ml-2">
+        <div class="w-1 bg-emerald-400 rounded-full wave-bar"></div>
+        <div class="w-1 bg-brand-400 rounded-full wave-bar"></div>
+        <div class="w-1 bg-accent-400 rounded-full wave-bar"></div>
+        <div class="w-1 bg-brand-400 rounded-full wave-bar"></div>
+        <div class="w-1 bg-emerald-400 rounded-full wave-bar"></div>
+      </div>
+    </div>
+
+    <!-- Konten utama -->
+    <main id="app-content" class="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
+
+      <!-- ===== SCREEN 1: BERANDA ===== -->
+      <section id="screen-home" class="space-y-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-brand-600 via-brand-700 to-accent-700 rounded-3xl p-5 text-white shadow-lg relative overflow-hidden">
+          <div class="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+          <div class="absolute -left-6 -bottom-6 w-28 h-28 bg-emerald-400/20 rounded-full blur-xl pointer-events-none"></div>
+          <div class="flex flex-wrap items-center gap-1.5 mb-2.5">
+            <span class="bg-amber-400 text-slate-900 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full uppercase tracking-wider">Kurikulum Merdeka</span>
+            <span class="bg-white/20 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full">SMP/MTs Kelas VII</span>
+          </div>
+          <p class="text-[11px] uppercase tracking-widest text-brand-200 font-bold">Modul Ajar Digital Interaktif</p>
+          <h2 class="font-display text-2xl font-bold leading-snug mt-0.5">Pengenalan Dasar Sistem Komputer</h2>
+          <p class="text-xs text-brand-100 font-medium mt-0.5">Mata Pelajaran Informatika (TIK)</p>
+          <div class="mt-3.5 bg-white/15 backdrop-blur-md border border-white/20 rounded-2xl p-3 relative">
+            <i class="fas fa-quote-left text-amber-300/60 text-sm absolute top-2.5 left-3"></i>
+            <p class="text-xs italic text-white pl-5 leading-relaxed font-medium">"Teknologi bukan hanya untuk digunakan, tetapi juga untuk dipahami dan dikembangkan."</p>
+          </div>
+          <div class="grid grid-cols-3 gap-1.5 mt-3.5 text-center text-[10px] font-bold">
+            <div class="bg-slate-900/30 rounded-xl py-1.5 px-1 border border-white/10"><i class="fas fa-microchip text-emerald-300 block mb-0.5 text-xs"></i> HARDWARE</div>
+            <div class="bg-slate-900/30 rounded-xl py-1.5 px-1 border border-white/10"><i class="fas fa-code text-amber-300 block mb-0.5 text-xs"></i> SOFTWARE</div>
+            <div class="bg-slate-900/30 rounded-xl py-1.5 px-1 border border-white/10"><i class="fas fa-user-astronaut text-sky-300 block mb-0.5 text-xs"></i> BRAINWARE</div>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between px-1">
+          <h3 class="font-display font-bold text-sm text-slate-800">Daftar Isi & Menu Belajar</h3>
+          <button onclick="toggleHelpModal()" class="text-[11px] font-semibold text-brand-600 hover:underline flex items-center gap-1"><i class="fas fa-circle-info"></i> Petunjuk</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div onclick="navigateTo('tujuan')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-brand-400 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-9 h-9 rounded-xl bg-blue-50 text-brand-600 flex items-center justify-center text-base group-hover:scale-110 transition"><i class="fas fa-bullseye"></i></div>
+              <span class="text-[10px] font-extrabold text-slate-300 group-hover:text-brand-500">01</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800">Tujuan Belajar</h4>
+            <p class="text-[10px] text-slate-500 mt-0.5">5 Capaian & Tahukah Kamu?</p>
+          </div>
+          <div onclick="navigateTo('materi')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-emerald-400 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-base group-hover:scale-110 transition"><i class="fas fa-book-open"></i></div>
+              <span class="text-[10px] font-extrabold text-slate-300 group-hover:text-emerald-500">02</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800">Materi Lengkap</h4>
+            <p class="text-[10px] text-slate-500 mt-0.5">Alur, HW, SW & Brainware</p>
+          </div>
+          <div onclick="navigateTo('video')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-rose-400 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-base group-hover:scale-110 transition"><i class="fab fa-youtube"></i></div>
+              <span class="text-[10px] font-extrabold text-slate-300 group-hover:text-rose-500">03</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800">Video Edukasi</h4>
+            <p class="text-[10px] text-slate-500 mt-0.5">Cara Kerja Komputer</p>
+          </div>
+          <div onclick="navigateTo('simulasi')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-purple-400 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-base group-hover:scale-110 transition"><i class="fas fa-gamepad"></i></div>
+              <span class="text-[10px] font-extrabold text-slate-300 group-hover:text-purple-500">04</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800">Aktivitas & Game</h4>
+            <p class="text-[10px] text-slate-500 mt-0.5">Sortir, Rakit PC & Proyek</p>
+          </div>
+          <div onclick="navigateTo('kuis')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-amber-400 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-base group-hover:scale-110 transition"><i class="fas fa-pen-to-square"></i></div>
+              <span class="text-[10px] font-extrabold text-slate-300 group-hover:text-amber-500">05</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800">Latihan 10 Soal</h4>
+            <p class="text-[10px] text-slate-500 mt-0.5">Kuis PG & Sertifikat</p>
+          </div>
+          <div onclick="navigateTo('refleksi')" class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200/80 hover:border-indigo-400 hover:shadow-md transition cursor-pointer group">
+            <div class="flex items-center justify-between mb-2">
+              <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-base group-hover:scale-110 transition"><i class="fas fa-clipboard-check"></i></div>
+              <span class="text-[10px] font-extrabold text-slate-300 group-hover:text-indigo-500">06</span>
+            </div>
+            <h4 class="font-bold text-xs text-slate-800">Evaluasi Diri</h4>
+            <p class="text-[10px] text-slate-500 mt-0.5">Rangkuman & Refleksi</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brand-600 to-accent-600 text-white flex items-center justify-center font-bold text-sm shadow">N</div>
+            <div>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-brand-600 block">Disusun Oleh</span>
+              <h4 class="font-bold text-xs text-slate-800"><span data-meta="author"></span> <span class="text-slate-500 font-normal">(NIM: <span data-meta="nim"></span>)</span></h4>
+              <p class="text-[10px] text-slate-500"></p>
+            </div>
+          </div>
+          <button onclick="toggleRefModal()" class="text-[10px] bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-2.5 py-1.5 rounded-xl transition">Referensi</button>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 2: TUJUAN ===== -->
+      <section id="screen-tujuan" class="hidden space-y-4 animate-fade-in">
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 space-y-4">
+          <div class="flex items-center space-x-3">
+            <div class="w-11 h-11 rounded-2xl bg-brand-100 text-brand-600 flex items-center justify-center text-xl shrink-0"><i class="fas fa-bullseye"></i></div>
+            <div>
+              <h2 class="font-display font-bold text-base text-slate-800">Tujuan Pembelajaran</h2>
+              <p class="text-xs text-slate-500">Setelah mempelajari modul ini, peserta didik diharapkan mampu:</p>
+            </div>
+          </div>
+          <div class="bg-brand-50 border border-brand-200 rounded-2xl p-3 text-xs text-brand-900 font-medium flex items-center gap-2.5">
+            <i class="fas fa-lightbulb text-amber-500 text-base shrink-0"></i>
+            <span>Yuk, pahami dasar sistem komputer agar kita bisa menggunakan teknologi dengan bijak dan cerdas!</span>
+          </div>
+          <div id="tujuan-list" class="space-y-2.5"><!-- diisi dari js/data.js (tujuanItems) --></div>
+          <div class="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4 space-y-1.5">
+            <div class="flex items-center gap-2 text-amber-800 font-display font-bold text-xs"><i class="fas fa-star text-amber-500"></i> TAHUKAH KAMU?</div>
+            <p class="text-xs text-slate-700 leading-relaxed"><strong>Komputer</strong> adalah hasil karya manusia yang dirancang untuk membantu menyelesaikan pekerjaan dengan <strong>cepat, tepat, dan efisien</strong>.</p>
+          </div>
+          <button onclick="navigateTo('materi')" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-2xl shadow-md text-xs transition flex items-center justify-center gap-2">
+            Mulai Belajar Materi <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 3: MATERI (4 TAB) ===== -->
+      <section id="screen-materi" class="hidden space-y-4 animate-fade-in">
+        <div class="flex rounded-2xl bg-slate-200 p-1 space-x-1 text-[11px] font-bold overflow-x-auto no-scrollbar">
+          <button id="tab-konsep-btn" onclick="switchMateriTab('konsep')" class="flex-1 py-2 px-2.5 rounded-xl bg-white shadow text-brand-600 whitespace-nowrap transition">1. Konsep & Alur</button>
+          <button id="tab-komponen-btn" onclick="switchMateriTab('komponen')" class="flex-1 py-2 px-2.5 rounded-xl text-slate-600 whitespace-nowrap transition">2. Komponen</button>
+          <button id="tab-hw-btn" onclick="switchMateriTab('hw')" class="flex-1 py-2 px-2.5 rounded-xl text-slate-600 whitespace-nowrap transition">3. Hardware</button>
+          <button id="tab-swbw-btn" onclick="switchMateriTab('swbw')" class="flex-1 py-2 px-2.5 rounded-xl text-slate-600 whitespace-nowrap transition">4. SW & BW</button>
+        </div>
+
+        <!-- TAB 1: Konsep & Alur -->
+        <div id="materi-konsep" class="space-y-3.5">
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="font-display font-bold text-base text-slate-800">Apa Itu Sistem Komputer?</h3>
+            <p class="text-xs text-slate-600 leading-relaxed bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+              <strong>Sistem komputer</strong> adalah sekumpulan komponen yang saling bekerja sama untuk mengolah data menjadi informasi yang bermanfaat.
+            </p>
+            <h4 class="font-bold text-xs text-slate-800 pt-1">Cara Kerja Sistem Komputer:</h4>
+            <div class="grid grid-cols-2 gap-2.5 text-xs">
+              <div class="p-3 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1">
+                <div class="flex items-center justify-between"><span class="font-extrabold text-emerald-800 text-[11px]">1. INPUT (Masukan)</span><i class="fas fa-keyboard text-emerald-600"></i></div>
+                <p class="text-[11px] text-slate-600 leading-snug">Data dimasukkan ke komputer melalui perangkat input.</p>
+                <span class="block text-[10px] font-semibold text-emerald-700">Contoh: Keyboard, Mouse, Scanner</span>
+              </div>
+              <div class="p-3 rounded-2xl bg-blue-50 border border-blue-200 space-y-1">
+                <div class="flex items-center justify-between"><span class="font-extrabold text-brand-800 text-[11px]">2. PROCESS (Proses)</span><i class="fas fa-microchip text-brand-600"></i></div>
+                <p class="text-[11px] text-slate-600 leading-snug">Data diproses oleh komponen yang ada di dalam komputer.</p>
+                <span class="block text-[10px] font-semibold text-brand-700">Contoh: CPU, RAM</span>
+              </div>
+              <div class="p-3 rounded-2xl bg-purple-50 border border-purple-200 space-y-1">
+                <div class="flex items-center justify-between"><span class="font-extrabold text-purple-800 text-[11px]">3. OUTPUT (Keluaran)</span><i class="fas fa-desktop text-purple-600"></i></div>
+                <p class="text-[11px] text-slate-600 leading-snug">Hasil proses akan ditampilkan sebagai informasi.</p>
+                <span class="block text-[10px] font-semibold text-purple-700">Contoh: Monitor, Printer, Speaker</span>
+              </div>
+              <div class="p-3 rounded-2xl bg-amber-50 border border-amber-200 space-y-1">
+                <div class="flex items-center justify-between"><span class="font-extrabold text-amber-800 text-[11px]">4. INFORMASI</span><i class="fas fa-lightbulb text-amber-600"></i></div>
+                <p class="text-[11px] text-slate-600 leading-snug">Digunakan oleh pengguna untuk membantu pengambilan keputusan.</p>
+                <span class="block text-[10px] font-semibold text-amber-700">Hasil akhir bermanfaat</span>
+              </div>
+            </div>
+            <div class="bg-slate-900 text-white rounded-2xl p-3.5 space-y-2">
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-300 block"><i class="fas fa-diagram-project mr-1"></i> Contoh Alur Sederhana</span>
+              <div class="flex items-center justify-between text-center text-[10px] gap-1">
+                <div class="flex-1 bg-slate-800 p-2 rounded-xl border border-slate-700"><i class="fas fa-keyboard text-emerald-400 text-sm mb-1 block"></i><span class="font-semibold">Ketik Surat di Keyboard</span></div>
+                <i class="fas fa-arrow-right text-slate-500"></i>
+                <div class="flex-1 bg-slate-800 p-2 rounded-xl border border-slate-700"><i class="fas fa-microchip text-brand-400 text-sm mb-1 block"></i><span class="font-semibold">CPU Memproses Data</span></div>
+                <i class="fas fa-arrow-right text-slate-500"></i>
+                <div class="flex-1 bg-slate-800 p-2 rounded-xl border border-slate-700"><i class="fas fa-desktop text-purple-400 text-sm mb-1 block"></i><span class="font-semibold">Monitor Tampilkan Surat</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Simulasi canvas -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-xs text-slate-800 flex items-center gap-1.5"><i class="fas fa-wave-square text-brand-600"></i> Simulasi Animasi Alur Paket Data</h4>
+              <span class="text-[10px] bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">Interaktif</span>
+            </div>
+            <p class="text-[11px] text-slate-500">Ketik teks singkat atau tekan tombol kirim untuk melihat sinyal data bergerak dari Input → CPU/RAM → Output:</p>
+            <div class="flex gap-2">
+              <input type="text" id="sim-input-text" maxlength="12" value="HALO SMP" placeholder="Ketik kata..." class="flex-1 px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
+              <button onclick="sendBurstData()" class="bg-brand-600 hover:bg-brand-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow transition flex items-center gap-1"><i class="fas fa-paper-plane"></i> Kirim</button>
+            </div>
+            <div class="flex items-center justify-between text-[11px] bg-slate-50 px-3 py-2 rounded-xl border border-slate-200">
+              <div class="flex items-center gap-2">
+                <span class="font-semibold text-slate-600">Kecepatan:</span>
+                <button onclick="setAnimSpeed(1.5)" id="spd-slow" class="px-2 py-0.5 rounded-lg bg-slate-200 text-slate-700 font-bold">1x</button>
+                <button onclick="setAnimSpeed(3.2)" id="spd-fast" class="px-2 py-0.5 rounded-lg bg-brand-600 text-white font-bold">2x</button>
+              </div>
+              <button onclick="stepSinglePacket()" class="text-brand-600 font-bold hover:underline flex items-center gap-1"><i class="fas fa-forward-step"></i> Uji 1 Paket</button>
+            </div>
+            <div class="w-full bg-slate-900 rounded-2xl p-2 relative overflow-hidden border-2 border-slate-800">
+              <canvas id="dataFlowCanvas" class="w-full h-36 block"></canvas>
+            </div>
+          </div>
+
+          <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-3.5 text-xs text-indigo-950">
+            <strong class="block text-indigo-700 mb-0.5"><i class="fas fa-circle-info mr-1"></i> Tahukah Kamu?</strong>
+            Komputer tidak bisa bekerja sendiri. Semua komponen di dalamnya harus saling bekerja sama agar komputer dapat memberikan hasil yang bermanfaat.
+          </div>
+        </div>
+
+        <!-- TAB 2: Komponen -->
+        <div id="materi-komponen" class="hidden space-y-3.5">
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="font-display font-bold text-base text-slate-800">3 Komponen Utama Sistem Komputer</h3>
+            <p class="text-xs text-slate-500">Sistem komputer terdiri dari tiga komponen utama yang saling bekerja sama:</p>
+            <div class="space-y-2.5 text-xs">
+              <div class="p-3.5 rounded-2xl bg-blue-50 border border-blue-200">
+                <div class="flex items-center justify-between mb-1"><span class="font-extrabold text-brand-800">1. HARDWARE (Perangkat Keras)</span><span class="text-[10px] bg-brand-600 text-white px-2 py-0.5 rounded-full font-bold">Tangible</span></div>
+                <p class="text-[11px] text-slate-700 leading-relaxed">Semua bagian fisik komputer yang dapat dilihat dan disentuh. Bersifat nyata dan membutuhkan komponen lainnya agar bekerja. (Contoh: Monitor, Keyboard, Mouse, CPU).</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-200">
+                <div class="flex items-center justify-between mb-1"><span class="font-extrabold text-purple-800">2. SOFTWARE (Perangkat Lunak)</span><span class="text-[10px] bg-purple-600 text-white px-2 py-0.5 rounded-full font-bold">Intangible</span></div>
+                <p class="text-[11px] text-slate-700 leading-relaxed">Program atau instruksi yang menjalankan komputer dan mengatur kerja hardware. Tidak berwujud fisik tetapi sangat penting. (Contoh: Windows, Linux, Office, Chrome, Canva).</p>
+              </div>
+              <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200">
+                <div class="flex items-center justify-between mb-1"><span class="font-extrabold text-emerald-800">3. BRAINWARE (Pengguna)</span><span class="text-[10px] bg-emerald-600 text-white px-2 py-0.5 rounded-full font-bold">Pengendali</span></div>
+                <p class="text-[11px] text-slate-700 leading-relaxed">Manusia yang menggunakan, mengelola, dan memanfaatkan komputer. Berperan penting mengoperasikan dan mengembangkan komputer. (Contoh: Siswa, Guru, Programmer, Teknisi).</p>
+              </div>
+            </div>
+            <div class="bg-slate-900 text-white p-3.5 rounded-2xl space-y-2">
+              <span class="text-[10px] font-bold uppercase text-emerald-400 block"><i class="fas fa-arrows-spin mr-1"></i> Siklus Cara Kerja Bersama</span>
+              <div class="grid grid-cols-2 gap-2 text-[10px]">
+                <div class="bg-slate-800 p-2 rounded-xl border border-slate-700"><strong class="text-sky-300 block">1. Brainware</strong>Pengguna memberi perintah atau memasukkan data.</div>
+                <div class="bg-slate-800 p-2 rounded-xl border border-slate-700"><strong class="text-purple-300 block">2. Software</strong>Perangkat lunak memberi instruksi kepada hardware.</div>
+                <div class="bg-slate-800 p-2 rounded-xl border border-slate-700"><strong class="text-brand-300 block">3. Hardware (Proses)</strong>Perangkat keras menerima dan memproses data di CPU.</div>
+                <div class="bg-slate-800 p-2 rounded-xl border border-slate-700"><strong class="text-emerald-300 block">4. Hardware (Output)</strong>Hasil diproses dan ditampilkan sebagai informasi.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h4 class="font-display font-bold text-sm text-slate-800 flex items-center gap-1.5"><i class="fas fa-earth-asia text-brand-600"></i> Contoh dalam Kehidupan Sehari-hari</h4>
+            <div id="daily-examples-container" class="grid grid-cols-2 gap-2.5"><!-- diisi dari js/data.js (dailyExamples) --></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: Hardware -->
+        <div id="materi-hw" class="hidden space-y-3.5">
+          <div class="bg-blue-600 text-white rounded-3xl p-4 shadow-sm">
+            <h3 class="font-display font-bold text-base">10 Perangkat Keras (Hardware) & Fungsinya</h3>
+            <p class="text-xs text-blue-100 mt-0.5">Hardware adalah semua bagian fisik komputer yang dapat dilihat dan disentuh.</p>
+          </div>
+          <div id="hardware-list-container" class="grid grid-cols-1 gap-2.5"><!-- diisi dari js/data.js (hardwareItems) --></div>
+          <div class="bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300 rounded-2xl p-4 space-y-1">
+            <div class="flex items-center gap-2 font-display font-bold text-xs text-amber-800"><i class="fas fa-bolt text-amber-500 text-base"></i> FAKTA MENARIK!</div>
+            <p class="text-xs text-slate-700 leading-relaxed">Komponen transistor terkecil di dalam <strong>CPU</strong> dapat berukuran hanya <strong>0,000001 meter (1 nanometer)</strong>! Itu jauh lebih kecil daripada sehelai rambut manusia.</p>
+          </div>
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-2.5">
+            <h4 class="font-display font-bold text-xs text-emerald-700 flex items-center gap-1.5"><i class="fas fa-shield-heart text-emerald-600 text-sm"></i> Cara Merawat Hardware (4 Langkah)</h4>
+            <div class="space-y-2 text-xs text-slate-700">
+              <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer"><input type="checkbox" checked class="accent-emerald-600 w-4 h-4 rounded"><span>1. Bersihkan komputer secara rutin dari debu.</span></label>
+              <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer"><input type="checkbox" checked class="accent-emerald-600 w-4 h-4 rounded"><span>2. Hindari panas berlebih dan letakkan di tempat yang sejuk.</span></label>
+              <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer"><input type="checkbox" checked class="accent-emerald-600 w-4 h-4 rounded"><span>3. Matikan komputer dengan benar (Shut Down) setelah digunakan.</span></label>
+              <label class="flex items-center gap-2.5 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80 cursor-pointer"><input type="checkbox" checked class="accent-emerald-600 w-4 h-4 rounded"><span>4. Jauhkan dari cairan dan makanan/minuman.</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 4: Software & Brainware -->
+        <div id="materi-swbw" class="hidden space-y-3.5">
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="font-display font-bold text-base text-purple-900">A. Software (Perangkat Lunak)</h3>
+            <p class="text-xs text-slate-600 leading-relaxed"><strong>Software</strong> adalah program atau instruksi yang menjalankan komputer dan mengatur kerja hardware agar dapat melakukan tugas tertentu. Tidak memiliki bentuk fisik (intangible).</p>
+            <div class="space-y-2.5">
+              <div class="p-3 rounded-2xl bg-purple-50/70 border border-purple-200 space-y-1.5">
+                <h4 class="font-bold text-xs text-purple-900">1. Sistem Operasi (Operating System)</h4>
+                <p class="text-[11px] text-slate-600">Mengatur seluruh kerja komputer dan menjadi penghubung antara pengguna dengan hardware.</p>
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  <span class="bg-white border border-purple-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fab fa-windows text-blue-600"></i> Windows</span>
+                  <span class="bg-white border border-purple-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fab fa-linux text-slate-800"></i> Linux</span>
+                  <span class="bg-white border border-purple-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fab fa-apple text-slate-700"></i> macOS</span>
+                  <span class="bg-white border border-purple-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fab fa-android text-emerald-600"></i> Android</span>
+                </div>
+              </div>
+              <div class="p-3 rounded-2xl bg-blue-50/70 border border-blue-200 space-y-1.5">
+                <h4 class="font-bold text-xs text-brand-900">2. Aplikasi (Application Software)</h4>
+                <p class="text-[11px] text-slate-600">Digunakan untuk membantu pengguna menyelesaikan pekerjaan tertentu.</p>
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  <span class="bg-white border border-blue-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-file-word text-blue-600"></i> Ms. Word</span>
+                  <span class="bg-white border border-blue-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-file-excel text-emerald-600"></i> Ms. Excel</span>
+                  <span class="bg-white border border-blue-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-file-powerpoint text-orange-600"></i> PowerPoint</span>
+                  <span class="bg-white border border-blue-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fab fa-chrome text-amber-500"></i> Chrome</span>
+                  <span class="bg-white border border-blue-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-palette text-cyan-600"></i> Canva</span>
+                </div>
+              </div>
+              <div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-1.5">
+                <h4 class="font-bold text-xs text-amber-900">3. Utility Software</h4>
+                <p class="text-[11px] text-slate-600">Program bantu untuk perawatan, optimasi, dan keamanan sistem.</p>
+                <div class="flex flex-wrap gap-1.5 pt-1">
+                  <span class="bg-white border border-amber-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-shield-virus text-rose-600"></i> Antivirus</span>
+                  <span class="bg-white border border-amber-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-file-zipper text-purple-600"></i> WinRAR</span>
+                  <span class="bg-white border border-amber-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-broom text-emerald-600"></i> CCleaner</span>
+                  <span class="bg-white border border-amber-200 text-slate-700 text-[10px] font-bold px-2 py-1 rounded-lg flex items-center gap-1"><i class="fas fa-cloud-arrow-up text-blue-600"></i> Backup</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+            <h3 class="font-display font-bold text-base text-emerald-900">B. Brainware (Pengguna)</h3>
+            <p class="text-xs text-slate-600 leading-relaxed"><strong>Brainware</strong> adalah manusia yang menggunakan, mengelola, dan memanfaatkan komputer untuk menyelesaikan tugas. Tanpa brainware, komputer tidak akan berguna.</p>
+            <div id="brainware-container" class="space-y-2 text-xs"><!-- diisi dari js/data.js (brainwareItems) --></div>
+          </div>
+        </div>
+
+        <button onclick="navigateTo('video')" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 rounded-2xl shadow-md text-xs transition flex items-center justify-center gap-2">
+          Lanjut ke Video Pembelajaran <i class="fab fa-youtube text-sm"></i>
+        </button>
+      </section>
+
+      <!-- ===== SCREEN 4: VIDEO ===== -->
+     
+<!-- ===== SCREEN 4: VIDEO ===== -->
+<section id="screen-video" class="hidden space-y-4 animate-fade-in">
+  <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+
+    <div class="flex items-center space-x-2 text-rose-600 font-display font-bold text-sm">
+      <i class="fab fa-youtube text-xl"></i>
+      <h2>Video Edukasi: Bagaimana Komputer Bekerja?</h2>
+    </div>
+
+    <p class="text-xs text-slate-500 leading-relaxed">
+      Simak video pembelajaran berikut untuk memahami secara visual hubungan kerja antara Hardware, Software, dan Brainware.
+    </p>
+
+    <div class="relative w-full rounded-2xl overflow-hidden bg-slate-900 shadow-md aspect-video border border-slate-200">
+
+      <!-- Video YouTube terbaru -->
+      <iframe
+        class="w-full h-full"
+        src="https://www.youtube-nocookie.com/embed/XWiubIsUkMc"
+        title="Video Edukasi Informatika SMP"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowfullscreen>
+      </iframe>
+    </div>
+
+    <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 space-y-2">
+      <span class="font-bold text-brand-700 block">
+        <i class="fas fa-list-check mr-1"></i> Poin Penting dari Video:
+      </span>
+
+      <ul class="list-disc pl-4 space-y-1 text-[11px] text-slate-600">
+        <li>Komputer bekerja pada level paling dasar menggunakan sistem bilangan biner (0 dan 1) yang mewakili kondisi aliran listrik mati dan hidup pada transistor.</li>
+        <li>Seluruh data teks dan angka diterjemahkan melalui standar pengkodean (ASCII dan UTF-8) serta diatur pembacaannya secara teratur oleh clock signal.</li>
+        <li>Gambar digital dibentuk oleh kumpulan piksel yang masing-masing menggabungkan nilai biner intensitas warna merah, hijau, dan biru (RGB).</li>
+        <li>Suara alami dikonversi dari gelombang analog menjadi data biner melalui Analog-to-Digital Converter (ADC), lalu diubah kembali menjadi getaran udara lewat Digital-to-Analog Converter (DAC) saat diputar.</li>
+        <li>Video adalah gabungan rangkaian gambar diam (frame) yang diputar sangat cepat per detik (FPS) bersamaan dengan trek audio digital.</li>
+      </ul>
+    </div>
+  </div>
+
+  <button onclick="navigateTo('simulasi')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-2xl shadow-md text-xs transition flex items-center justify-center gap-2">
+    Coba Aktivitas & Game Interaktif <i class="fas fa-gamepad"></i>
+  </button>
+</section>
+
+      <!-- ===== SCREEN 5: AKTIVITAS & GAME ===== -->
+      <section id="screen-simulasi" class="hidden space-y-4 animate-fade-in">
+        <div class="flex rounded-2xl bg-slate-200 p-1 space-x-1 text-[11px] font-bold">
+          <button id="sim-tab-1" onclick="switchSimTab('sortir')" class="flex-1 py-2 rounded-xl bg-white shadow text-purple-600 transition">1. Sortir Item</button>
+          <button id="sim-tab-2" onclick="switchSimTab('rakit')" class="flex-1 py-2 rounded-xl text-slate-600 transition">2. Rakit PC</button>
+          <button id="sim-tab-3" onclick="switchSimTab('proyek')" class="flex-1 py-2 rounded-xl text-slate-600 transition">3. Tugas Mini</button>
+        </div>
+
+        <!-- Game 1 -->
+        <div id="sim-sortir" class="space-y-3">
+          <div class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white p-4 rounded-3xl shadow-sm">
+            <div class="flex items-center justify-between">
+              <h3 class="font-display font-bold text-sm"><i class="fas fa-boxes-packing mr-1"></i> Game 1: Klasifikasi Komponen</h3>
+              <div class="flex items-center gap-2 text-xs font-bold">
+                <span class="bg-white/20 px-2 py-0.5 rounded-full" id="sort-score-badge">Skor: 0</span>
+                <span class="bg-rose-500/80 px-2 py-0.5 rounded-full" id="sort-lives-badge">❤️❤️❤️</span>
+              </div>
+            </div>
+            <p class="text-[11px] text-purple-100 mt-1">Pilih kategori yang tepat (Hardware, Software, atau Brainware) untuk setiap item yang muncul!</p>
+          </div>
+          <div id="sort-game-area" class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center space-y-4">
+            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider" id="sort-progress-text">Item 1 dari 10</div>
+            <div class="w-24 h-24 mx-auto rounded-3xl bg-slate-50 border-2 border-brand-200 flex flex-col items-center justify-center p-2 shadow-inner">
+              <i id="sort-item-icon" class="fas fa-desktop text-brand-600 text-3xl mb-1.5"></i>
+              <span id="sort-item-name" class="font-extrabold text-xs text-slate-800">Monitor</span>
+            </div>
+            <p id="sort-feedback-msg" class="text-[11px] font-semibold text-slate-500 min-h-[18px]">Termasuk kelompok manakah item di atas?</p>
+            <div class="grid grid-cols-3 gap-2 pt-1">
+              <button onclick="checkSortAnswer('Hardware')" class="p-3 rounded-2xl bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 text-brand-800 font-bold text-xs transition flex flex-col items-center gap-1 active:scale-95"><i class="fas fa-microchip text-base text-brand-600"></i><span>Hardware</span></button>
+              <button onclick="checkSortAnswer('Software')" class="p-3 rounded-2xl bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 text-purple-800 font-bold text-xs transition flex flex-col items-center gap-1 active:scale-95"><i class="fas fa-code text-base text-purple-600"></i><span>Software</span></button>
+              <button onclick="checkSortAnswer('Brainware')" class="p-3 rounded-2xl bg-emerald-50 hover:bg-emerald-100 border-2 border-emerald-200 text-emerald-800 font-bold text-xs transition flex flex-col items-center gap-1 active:scale-95"><i class="fas fa-user-astronaut text-base text-emerald-600"></i><span>Brainware</span></button>
+            </div>
+          </div>
+          <div id="sort-game-result" class="hidden bg-white p-5 rounded-3xl shadow-sm border border-slate-200 text-center space-y-3">
+            <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl mx-auto"><i class="fas fa-trophy"></i></div>
+            <h4 class="font-display font-bold text-base text-slate-800" id="sort-end-title">Klasifikasi Selesai!</h4>
+            <p class="text-xs text-slate-600" id="sort-end-desc">Skor akhir kamu: 100 poin.</p>
+            <button onclick="resetSortGame()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition"><i class="fas fa-rotate-right mr-1"></i> Main Lagi</button>
+          </div>
+        </div>
+
+        <!-- Game 2 -->
+        <div id="sim-rakit" class="hidden space-y-3">
+          <div class="bg-gradient-to-r from-brand-600 to-cyan-600 text-white p-4 rounded-3xl shadow-sm">
+            <h3 class="font-display font-bold text-sm"><i class="fas fa-screwdriver-wrench mr-1"></i> Game 2: Simulasi Rakit Komputer</h3>
+            <p class="text-[11px] text-blue-100 mt-0.5">Ketuk komponen di bawah, lalu ketuk slot yang tepat untuk merakit sistem komputer!</p>
+          </div>
+          <div class="bg-slate-900 p-4 rounded-3xl text-white border-2 border-slate-700 space-y-3">
+            <div class="flex justify-between items-center text-[10px] font-mono">
+              <span class="text-emerald-400">SYSTEM ASSEMBLY BOARD</span>
+              <span id="pc-build-score" class="text-amber-300 font-bold">Terpasang: 0 / 4</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2.5">
+              <div onclick="placeComponent('cpu')" id="slot-cpu" class="h-20 rounded-2xl border-2 border-dashed border-slate-600 bg-slate-800/70 flex flex-col items-center justify-center p-2 text-center cursor-pointer hover:border-brand-400 transition">
+                <i class="fas fa-microchip text-slate-500 text-lg mb-1" id="icon-cpu"></i><span class="text-[10px] font-bold text-slate-400" id="text-cpu">Soket Processor (CPU)</span>
+              </div>
+              <div onclick="placeComponent('ram')" id="slot-ram" class="h-20 rounded-2xl border-2 border-dashed border-slate-600 bg-slate-800/70 flex flex-col items-center justify-center p-2 text-center cursor-pointer hover:border-emerald-400 transition">
+                <i class="fas fa-memory text-slate-500 text-lg mb-1" id="icon-ram"></i><span class="text-[10px] font-bold text-slate-400" id="text-ram">Slot Memori (RAM)</span>
+              </div>
+              <div onclick="placeComponent('ssd')" id="slot-ssd" class="h-20 rounded-2xl border-2 border-dashed border-slate-600 bg-slate-800/70 flex flex-col items-center justify-center p-2 text-center cursor-pointer hover:border-amber-400 transition">
+                <i class="fas fa-hard-drive text-slate-500 text-lg mb-1" id="icon-ssd"></i><span class="text-[10px] font-bold text-slate-400" id="text-ssd">Port Penyimpanan (SSD)</span>
+              </div>
+              <div onclick="placeComponent('io')" id="slot-io" class="h-20 rounded-2xl border-2 border-dashed border-slate-600 bg-slate-800/70 flex flex-col items-center justify-center p-2 text-center cursor-pointer hover:border-purple-400 transition">
+                <i class="fas fa-desktop text-slate-500 text-lg mb-1" id="icon-io"></i><span class="text-[10px] font-bold text-slate-400" id="text-io">Port Monitor & Keyboard</span>
+              </div>
+            </div>
+            <div id="pc-assembly-info" class="bg-slate-800 border border-slate-700 rounded-xl p-2.5 text-[11px] text-slate-300">
+              <i class="fas fa-circle-info text-brand-400 mr-1"></i> Pilih salah satu komponen di bawah untuk mulai merakit.
+            </div>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200 space-y-2">
+            <div class="flex justify-between items-center">
+              <span class="text-xs font-bold text-slate-700">Komponen Tersedia:</span>
+              <button onclick="resetPcBuilder()" class="text-[10px] text-brand-600 font-bold hover:underline">Reset Rakitan</button>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+              <button onclick="selectInventory('cpu')" id="inv-cpu" class="p-2 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-200 text-center transition flex flex-col items-center"><i class="fas fa-microchip text-brand-600 text-base mb-1"></i><span class="text-[10px] font-bold text-slate-700">CPU</span></button>
+              <button onclick="selectInventory('ram')" id="inv-ram" class="p-2 rounded-xl bg-slate-50 hover:bg-emerald-50 border border-slate-200 text-center transition flex flex-col items-center"><i class="fas fa-memory text-emerald-600 text-base mb-1"></i><span class="text-[10px] font-bold text-slate-700">RAM</span></button>
+              <button onclick="selectInventory('ssd')" id="inv-ssd" class="p-2 rounded-xl bg-slate-50 hover:bg-amber-50 border border-slate-200 text-center transition flex flex-col items-center"><i class="fas fa-hard-drive text-amber-600 text-base mb-1"></i><span class="text-[10px] font-bold text-slate-700">SSD</span></button>
+              <button onclick="selectInventory('io')" id="inv-io" class="p-2 rounded-xl bg-slate-50 hover:bg-purple-50 border border-slate-200 text-center transition flex flex-col items-center"><i class="fas fa-desktop text-purple-600 text-base mb-1"></i><span class="text-[10px] font-bold text-slate-700">Monitor/KB</span></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tugas mini -->
+       
+<div id="sim-proyek" class="hidden space-y-3.5">
+
+  <!-- Aktivitas observasi -->
+  <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+    <div class="flex items-center gap-2 text-emerald-700 font-display font-bold text-sm">
+      <i class="fas fa-magnifying-glass text-base"></i>
+      <h3>Aktivitas Mini (Observasi Sekitar)</h3>
+    </div>
+
+    <p class="text-xs text-slate-600">
+      Amati lingkungan sekitarmu. Temukan 3 perangkat keras komputer dan jelaskan fungsinya.
+    </p>
+
+    <div class="space-y-2 text-xs">
+      <label for="student-name" class="font-bold text-slate-700 block">
+        Nama Lengkap Siswa:
+      </label>
+      <input
+        type="text"
+        id="student-name"
+        placeholder="Masukkan nama lengkap kamu..."
+        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500"
+      >
+
+      <label for="mini-hw-1" class="font-bold text-slate-700 block pt-2">
+        Hasil Observasi Hardware:
+      </label>
+      <input
+        type="text"
+        id="mini-hw-1"
+        placeholder="1. Contoh: Mouse - Menggerakkan pointer"
+        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500"
+      >
+
+      <input
+        type="text"
+        id="mini-hw-2"
+        placeholder="2. Hardware kedua dan fungsinya..."
+        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500"
+      >
+
+      <input
+        type="text"
+        id="mini-hw-3"
+        placeholder="3. Hardware ketiga dan fungsinya..."
+        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-emerald-500"
+      >
+    </div>
+  </div>
+
+  <!-- Proyek poster -->
+  <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+    <div class="flex items-center gap-2 text-brand-700 font-display font-bold text-sm">
+      <i class="fas fa-palette text-base"></i>
+      <h3>Proyek Mini: Poster Digital Komponen</h3>
+    </div>
+
+    <div class="bg-blue-50 border border-blue-200 rounded-2xl p-3 text-xs text-slate-700 space-y-1">
+      <strong class="text-brand-800 block">Ketentuan Proyek:</strong>
+      <ul class="list-disc pl-4 text-[11px] space-y-0.5">
+        <li>Pilih satu komponen komputer, yaitu Hardware atau Software.</li>
+        <li>Jelaskan fungsi, cara kerja singkat, dan contoh penggunaannya.</li>
+        <li>Buat poster menggunakan Canva atau PowerPoint.</li>
+        <li>Presentasikan hasilnya di depan kelas.</li>
+      </ul>
+    </div>
+
+    <div class="space-y-2 text-xs">
+      <label for="proj-comp-name" class="font-bold text-slate-700 block">
+        Komponen yang Dipilih:
+      </label>
+      <input
+        type="text"
+        id="proj-comp-name"
+        placeholder="Contoh: Processor (CPU) atau Canva"
+        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-500"
+      >
+
+      <label for="proj-comp-desc" class="font-bold text-slate-700 block">
+        Rancangan Konsep Poster:
+      </label>
+      <textarea
+        id="proj-comp-desc"
+        rows="3"
+        placeholder="Tuliskan fungsi dan cara kerja singkat komponen..."
+        class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-brand-500"
+      ></textarea>
+    </div>
+
+    <button
+      type="button"
+      onclick="saveStudentActivity()"
+      class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl shadow text-xs transition flex items-center justify-center gap-1.5"
+    >
+      <i class="fas fa-file-pdf"></i>
+      Simpan dan Unduh PDF
+    </button>
+
+    <p
+      id="activity-save-status"
+      class="hidden text-center text-[11px] font-bold text-emerald-600"
+    ></p>
+  </div>
+
+</div>
+
+        <button onclick="navigateTo('kuis')" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-2xl shadow-md text-xs transition flex items-center justify-center gap-2">
+          Kerjakan Latihan 10 Soal Pilihan Ganda <i class="fas fa-arrow-right"></i>
+        </button>
+      </section>
+
+      <!-- ===== SCREEN 6: KUIS ===== -->
+      <section id="screen-kuis" class="hidden space-y-4 animate-fade-in">
+        <div id="quiz-intro-card" class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 space-y-3.5">
+          <div class="flex items-center space-x-3">
+            <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center text-2xl shrink-0"><i class="fas fa-pen-to-square"></i></div>
+            <div>
+              <h2 class="font-display font-bold text-base text-slate-800">Latihan Soal: Uji Pengetahuanmu!</h2>
+              <p class="text-xs text-slate-500">10 Soal Pilihan Ganda Sistem Komputer</p>
+            </div>
+          </div>
+          <div class="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 text-xs text-slate-700 space-y-1.5">
+            <div><i class="fas fa-list-ol text-brand-600 mr-2"></i> <strong>10 Soal Pilihan Ganda</strong> sesuai Modul Ajar</div>
+            <div><i class="fas fa-comment-dots text-emerald-600 mr-2"></i> Dilengkapi <strong>pembahasan otomatis</strong> tiap jawaban</div>
+            <div><i class="fas fa-certificate text-amber-500 mr-2"></i> Mendapatkan <strong>Sertifikat Digital</strong> (Bisa Diunduh)</div>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap Siswa (Untuk Sertifikat):</label>
+            <input type="text" id="student-name-input" placeholder="Masukkan nama lengkapmu..." class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:border-brand-500">
+          </div>
+          <button onclick="startQuiz()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-2xl shadow-md text-xs transition flex items-center justify-center gap-2">
+            Mulai Kerjakan 10 Soal <i class="fas fa-play text-[10px]"></i>
+          </button>
+        </div>
+
+        <div id="quiz-active-card" class="hidden space-y-3">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-700 bg-white px-3 py-1 rounded-full border border-slate-200" id="quiz-question-counter">Soal 1 / 10</span>
+            <span class="font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full border border-brand-200" id="quiz-live-score">Skor: 0</span>
+          </div>
+          <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-200 space-y-3">
+            <h3 id="quiz-question-text" class="font-bold text-xs text-slate-800 leading-relaxed">Memuat soal...</h3>
+            <div id="quiz-options-container" class="space-y-2"></div>
+            <div id="quiz-explanation-box" class="hidden p-3 rounded-2xl text-xs leading-relaxed border">
+              <strong id="quiz-exp-title" class="block mb-0.5"></strong>
+              <span id="quiz-exp-text"></span>
+            </div>
+          </div>
+          <button id="quiz-next-btn" onclick="nextQuestion()" disabled class="w-full bg-slate-300 text-white font-bold py-3 rounded-2xl text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+            Soal Berikutnya <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div id="quiz-result-card" class="hidden bg-white p-5 rounded-3xl shadow-md border border-slate-200 text-center space-y-4">
+          <div id="quiz-result-icon" class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl mx-auto shadow-inner"><i class="fas fa-award"></i></div>
+          <div>
+            <h2 id="quiz-result-title" class="font-display font-bold text-lg text-slate-800">Luar Biasa!</h2>
+            <p id="quiz-result-desc" class="text-xs text-slate-500 mt-0.5">Kamu telah menyelesaikan 10 soal latihan modul.</p>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 grid grid-cols-2 gap-2">
+            <div>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase">Nilai Akhir</span>
+              <span id="final-score-text" class="text-2xl font-black text-brand-600">100</span>
+            </div>
+            <div>
+              <span class="block text-[10px] text-slate-400 font-bold uppercase">Predikat</span>
+              <span id="final-status-badge" class="inline-block mt-1 text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">SANGAT BAIK</span>
+            </div>
+          </div>
+          <div class="p-4 rounded-2xl bg-gradient-to-br from-brand-50 via-white to-indigo-50 border-2 border-brand-300 text-center space-y-1.5 relative overflow-hidden">
+            <div class="text-[9px] font-extrabold tracking-widest uppercase text-brand-600">Sertifikat Penyelesaian Modul</div>
+            <h4 class="font-display font-bold text-sm text-slate-800" id="cert-student-name">Siswa SMP Kelas VII</h4>
+            <p class="text-[10px] text-slate-600">Telah berhasil menyelesaikan materi & evaluasi <strong>Pengenalan Dasar Sistem Komputer</strong> (Informatika VII).</p>
+            <div class="pt-1 flex justify-center gap-2">
+              <button onclick="downloadCertificatePNG()" class="bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold px-3.5 py-2 rounded-xl shadow transition flex items-center gap-1.5"><i class="fas fa-download"></i> Unduh Sertifikat (PNG)</button>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="resetQuiz()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-2xl text-xs transition"><i class="fas fa-rotate-right mr-1"></i> Ulangi Soal</button>
+            <button onclick="navigateTo('refleksi')" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl shadow text-xs transition">Evaluasi Diri <i class="fas fa-arrow-right ml-1"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== SCREEN 7: REFLEKSI ===== -->
+      <section id="screen-refleksi" class="hidden space-y-4 animate-fade-in">
+        <div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-3xl p-4 shadow-md space-y-2.5">
+          <div class="flex items-center gap-2 text-amber-300 font-display font-bold text-sm"><i class="fas fa-bookmark"></i><h3>Rangkuman Materi</h3></div>
+          <ul class="space-y-1.5 text-xs text-slate-200 leading-relaxed list-disc pl-4">
+            <li>Sistem komputer terdiri dari <strong>Hardware</strong> (perangkat keras), <strong>Software</strong> (perangkat lunak), dan <strong>Brainware</strong> (pengguna).</li>
+            <li><strong>Hardware</strong> adalah semua komponen fisik komputer.</li>
+            <li><strong>Software</strong> adalah program atau instruksi yang menjalankan komputer.</li>
+            <li><strong>Brainware</strong> adalah manusia yang menggunakan dan mengelola komputer.</li>
+            <li>Ketiga komponen bekerja bersama agar komputer dapat berfungsi dengan optimal.</li>
+          </ul>
+        </div>
+        <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200 space-y-3">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center text-lg shrink-0"><i class="fas fa-clipboard-check"></i></div>
+            <div>
+              <h2 class="font-display font-bold text-base text-slate-800">Evaluasi Diri (Refleksi)</h2>
+              <p class="text-[11px] text-slate-500">Beri tanda centang (✓) pada pernyataan yang sesuai dengan dirimu:</p>
+            </div>
+          </div>
+          <div id="self-eval-list" class="space-y-2 text-xs"><!-- diisi dari js/data.js (selfEvalItems) --></div>
+          <button onclick="submitSelfEvaluation()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-2xl shadow text-xs transition flex items-center justify-center gap-2"><i class="fas fa-check-double"></i> Simpan Evaluasi Diri</button>
+          <div id="self-eval-summary" class="hidden p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-900">
+            <strong class="block text-emerald-700 mb-0.5"><i class="fas fa-circle-check mr-1"></i> Refleksi Tersimpan!</strong>
+            <p id="self-eval-summary-text"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Navigasi bawah -->
+    <nav class="bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-2 flex justify-around items-center absolute bottom-0 left-0 right-0 z-40">
+      <button id="nav-home" onclick="navigateTo('home')" class="flex flex-col items-center text-brand-600 font-bold text-[10px] transition"><i class="fas fa-house text-base mb-0.5"></i><span>Beranda</span></button>
+      <button id="nav-materi" onclick="navigateTo('materi')" class="flex flex-col items-center text-slate-400 hover:text-brand-600 font-medium text-[10px] transition"><i class="fas fa-book-open text-base mb-0.5"></i><span>Materi</span></button>
+      <button id="nav-simulasi" onclick="navigateTo('simulasi')" class="flex flex-col items-center text-slate-400 hover:text-brand-600 font-medium text-[10px] transition"><i class="fas fa-gamepad text-base mb-0.5"></i><span>Aktivitas</span></button>
+      <button id="nav-kuis" onclick="navigateTo('kuis')" class="flex flex-col items-center text-slate-400 hover:text-brand-600 font-medium text-[10px] transition"><i class="fas fa-pen-to-square text-base mb-0.5"></i><span>Latihan</span></button>
+      <button id="nav-refleksi" onclick="navigateTo('refleksi')" class="flex flex-col items-center text-slate-400 hover:text-brand-600 font-medium text-[10px] transition"><i class="fas fa-clipboard-check text-base mb-0.5"></i><span>Refleksi</span></button>
+    </nav>
+
+    <!-- Modal petunjuk -->
+    <div id="help-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-5 max-w-xs w-full shadow-2xl space-y-3 animate-fade-in">
+        <div class="flex justify-between items-center border-b pb-2.5">
+          <h3 class="font-display font-bold text-sm text-slate-800"><i class="fas fa-circle-question text-brand-600 mr-1.5"></i> Petunjuk Penggunaan</h3>
+          <button onclick="toggleHelpModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="text-xs text-slate-600 space-y-2 leading-relaxed">
+          <p><strong>1. Audio Narasi:</strong> Ketuk tombol <em>Play</em> di bar atas untuk mendengarkan penjelasan suara pada tiap halaman.</p>
+          <p><strong>2. Materi 4 Tab:</strong> Pelajari Konsep & Alur (dengan simulasi animasi), Komponen Sehari-hari, 10 Hardware, serta Software & Brainware.</p>
+          <p><strong>3. Aktivitas & Game:</strong> Mainkan game sortir komponen, rakit PC, dan isi catatan Proyek Mini.</p>
+          <p><strong>4. Latihan 10 Soal & Refleksi:</strong> Kerjakan 10 soal PG untuk mendapatkan Sertifikat Digital, lalu isi Evaluasi Diri.</p>
+        </div>
+        <button onclick="toggleHelpModal()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-xs transition">Siap Belajar!</button>
+      </div>
+    </div>
+
+    <!-- Modal referensi -->
+    <div id="ref-modal" class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl space-y-3 animate-fade-in">
+        <div class="flex justify-between items-center border-b pb-2.5">
+          <h3 class="font-display font-bold text-sm text-slate-800"><i class="fas fa-book-bookmark text-brand-600 mr-1.5"></i> Sumber & Referensi Media</h3>
+          <button onclick="toggleRefModal()" class="w-7 h-7 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center text-xs"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div id="ref-list" class="text-[11px] text-slate-600 space-y-2.5 leading-relaxed max-h-64 overflow-y-auto pr-1"><!-- diisi dari js/data.js (referensiItems) --></div>
+        <button onclick="toggleRefModal()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-2.5 rounded-xl text-xs transition">Tutup Referensi</button>
+      </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast-box" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 text-white text-xs font-semibold px-4 py-2.5 rounded-2xl shadow-xl border border-slate-700 flex items-center gap-2 max-w-[90%] text-center">
+      <i id="toast-icon" class="fas fa-circle-info text-brand-400"></i>
+      <span id="toast-msg">Notifikasi</span>
+    </div>
+  </div>
+
+  <!-- Canvas tersembunyi untuk sertifikat PNG -->
+  <canvas id="certCanvas" width="800" height="560" class="hidden"></canvas>
+
+  <!-- JavaScript (urutan harus dipertahankan) -->
+  <script src="js/data.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/materi.js"></script>
+  <script src="js/games.js"></script>
+  <script src="js/quiz.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
