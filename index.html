@@ -977,5 +977,210 @@ async function saveStudentActivity() {
     status.classList.remove("hidden");
 }
 </script>
+<script>
+function downloadCertificatePNG() {
+  const canvas = document.getElementById("certCanvas");
+  if (!canvas) return;
+  const ctx = canvas.getContext("2d");
+
+  // Ukuran canvas (sesuai HTML: 800 x 560)
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // 1. Latar Belakang Putih Bersih & Watermark Tipis
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, w, h);
+
+  // Watermark "INFORMATIKA" di tengah
+  ctx.save();
+  ctx.fillStyle = "rgba(226, 232, 240, 0.35)";
+  ctx.font = "800 68px 'Plus Jakarta Sans', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("INFORMATIKA", w / 2, h / 2 - 15);
+  ctx.restore();
+
+  // 2. Ornamen Sudut Kiri Atas (Navy & Oranye)
+  // Segitiga Navy Kiri Atas
+  ctx.fillStyle = "#0f2544";
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(190, 0);
+  ctx.lineTo(0, 210);
+  ctx.closePath();
+  ctx.fill();
+
+  // Garis Diagonal Oranye/Emas Kiri Atas
+  ctx.fillStyle = "#d97706";
+  ctx.beginPath();
+  ctx.moveTo(190, 0);
+  ctx.lineTo(222, 0);
+  ctx.lineTo(0, 245);
+  ctx.lineTo(0, 210);
+  ctx.closePath();
+  ctx.fill();
+
+  // 3. Ornamen Sudut Kanan Bawah (Navy & Oranye)
+  // Segitiga Navy Kanan Bawah
+  ctx.fillStyle = "#0f2544";
+  ctx.beginPath();
+  ctx.moveTo(w, h);
+  ctx.lineTo(w - 190, h);
+  ctx.lineTo(w, h - 210);
+  ctx.closePath();
+  ctx.fill();
+
+  // Garis Diagonal Oranye/Emas Kanan Bawah
+  ctx.fillStyle = "#d97706";
+  ctx.beginPath();
+  ctx.moveTo(w - 190, h);
+  ctx.lineTo(w - 222, h);
+  ctx.lineTo(w, h - 245);
+  ctx.lineTo(w, h - 210);
+  ctx.closePath();
+  ctx.fill();
+
+  // 4. Bingkai Garis Ganda (Navy Luar & Emas Dalam)
+  ctx.strokeStyle = "#0f2544";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(22, 22, w - 44, h - 44);
+
+  ctx.strokeStyle = "#d97706";
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(30, 30, w - 60, h - 60);
+
+  // 5. Header Sertifikat (Tanpa "Kurikulum Merdeka")
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#1d4ed8";
+  ctx.font = "700 13px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("MODUL AJAR DIGITAL INTERAKTIF", w / 2, 82);
+
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "800 32px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("SERTIFIKAT PENGHARGAAN", w / 2, 122);
+
+  // 6. Sub-judul & Nama Siswa
+  ctx.fillStyle = "#475569";
+  ctx.font = "500 14px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("Sertifikat ini diberikan dengan bangga kepada:", w / 2, 165);
+
+  // Ambil nama siswa dari input atau elemen tampilan
+  const inputName = document.getElementById("student-name-input")?.value.trim();
+  const displayName = document.getElementById("cert-student-name")?.textContent.trim();
+  const studentName = inputName || displayName || "Siswa";
+
+  ctx.fillStyle = "#1d4ed8";
+  ctx.font = "800 30px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText(studentName, w / 2, 208);
+
+  // Garis pemisah tipis di bawah nama
+  ctx.strokeStyle = "#cbd5e1";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(w / 2 - 190, 222);
+  ctx.lineTo(w / 2 + 190, 222);
+  ctx.stroke();
+
+  // 7. Keterangan Materi (Tanpa "Jenjang SMP/MTs Kelas VII")
+  ctx.fillStyle = "#334155";
+  ctx.font = "500 13.5px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("Telah berhasil mempelajari materi dan lulus evaluasi pembelajaran pada topik:", w / 2, 250);
+
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "800 17.5px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("“Pengenalan Dasar Sistem Komputer (Hardware, Software & Brainware)”", w / 2, 278);
+
+  ctx.fillStyle = "#64748b";
+  ctx.font = "600 13.5px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("Mata Pelajaran Informatika", w / 2, 303);
+
+  // 8. Nilai Akhir (Tanpa "Predikat: Sangat Baik")
+  const finalScore = document.getElementById("final-score-text")?.textContent.trim() || "100";
+  ctx.fillStyle = "#1e3a8a";
+  ctx.font = "800 16px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText(`NILAI AKHIR: ${finalScore}`, w / 2, 345);
+
+  // 9. Lencana / Medali Emas di Kiri Bawah
+  const badgeX = 155;
+  const badgeY = 440;
+
+  // Pita bawah (Navy)
+  ctx.fillStyle = "#1e3a8a";
+  ctx.beginPath();
+  ctx.moveTo(badgeX - 18, badgeY + 22);
+  ctx.lineTo(badgeX - 28, badgeY + 72);
+  ctx.lineTo(badgeX - 14, badgeY + 60);
+  ctx.lineTo(badgeX - 4, badgeY + 72);
+  ctx.lineTo(badgeX - 4, badgeY + 22);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(badgeX + 4, badgeY + 22);
+  ctx.lineTo(badgeX + 4, badgeY + 72);
+  ctx.lineTo(badgeX + 14, badgeY + 60);
+  ctx.lineTo(badgeX + 28, badgeY + 72);
+  ctx.lineTo(badgeX + 18, badgeY + 22);
+  ctx.closePath();
+  ctx.fill();
+
+  // Lingkaran Luar Emas
+  ctx.fillStyle = "#f59e0b";
+  ctx.beginPath();
+  ctx.arc(badgeX, badgeY, 34, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Lingkaran Dalam Putih & Emas
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(badgeX, badgeY, 27, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Teks dalam Lencana
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "800 10px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("LULUS", badgeX, badgeY - 3);
+  ctx.font = "700 8.5px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("100% VALID", badgeX, badgeY + 10);
+
+  // 10. Tanggal & Tanda Tangan Penyusun (Kanan Bawah)
+  const signX = 615;
+  const today = new Date().toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
+
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#475569";
+  ctx.font = "500 12.5px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText(`Diterbitkan pada: ${today}`, signX, 412);
+
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "700 13px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("Penyusun Modul Pembelajaran,", signX, 432);
+
+  // Garis Tanda Tangan
+  ctx.strokeStyle = "#64748b";
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.moveTo(signX - 95, 488);
+  ctx.lineTo(signX + 95, 488);
+  ctx.stroke();
+
+  // Nama Penyusun Baru: Nasrullah, S.Pd
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "800 14px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillText("Nasrullah, S.Pd", signX, 508);
+
+  // 11. Proses Unduh Gambar PNG
+  const link = document.createElement("a");
+  const safeName = studentName.replace(/[^a-zA-Z0-9]/g, "_");
+  link.download = `Sertifikat_Sistem_Komputer_${safeName}.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+}
+</script>
 </body>
 </html>
