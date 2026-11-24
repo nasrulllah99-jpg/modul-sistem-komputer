@@ -56,11 +56,11 @@ const hardwareItems = [
   { no: 3,  name: "MOUSE",          desc: "Digunakan untuk menggerakkan pointer dan memilih perintah di layar.", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=400&q=75" },
   { no: 4,  name: "CPU (CASE)",     desc: "Tempat menyimpan komponen penting seperti motherboard, RAM, dan power supply.", img: "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=400&q=75" },
   { no: 5,  name: "RAM",            desc: "Menyimpan data sementara yang sedang diproses oleh komputer.", img: "https://images.unsplash.com/photo-1562976540-1502c2145186?auto=format&fit=crop&w=400&q=75" },
-  { no: 6,  name: "HARDDISK / SSD", desc: "Menyimpan data secara permanen seperti sistem operasi, aplikasi, dan dokumen.", img: "https://images.unsplash.com/photo-1544652478-6653e09f18a2?auto=format&fit=crop&w=400&q=75" },
+  { no: 6,  name: "HARDDISK / SSD", desc: "Menyimpan data secara permanen seperti sistem operasi, aplikasi, dan dokumen.", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQTCvUp23IE4VA6VMI_DH9DBi67KTyfDzG11n8MbWD1bg&s=10" },
   { no: 7,  name: "PRINTER",        desc: "Menghasilkan keluaran berupa cetakan di atas kertas.", img: "https://images.unsplash.com/photo-1612815154858-60aa4c59eaa6?auto=format&fit=crop&w=400&q=75" },
   { no: 8,  name: "SPEAKER",        desc: "Menghasilkan keluaran berupa suara atau audio.", img: "https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=400&q=75" },
-  { no: 9,  name: "WEBCAM",         desc: "Menangkap gambar atau video, digunakan untuk komunikasi online.", img: "https://images.unsplash.com/photo-1587826080692-f439cd0b70da?auto=format&fit=crop&w=400&q=75" },
-  { no: 10, name: "FLASHDISK",      desc: "Menyimpan dan memindahkan data dengan mudah.", img: "https://images.unsplash.com/photo-1618410320928-25228d811631?auto=format&fit=crop&w=400&q=75" }
+  { no: 9,  name: "WEBCAM",         desc: "Menangkap gambar atau video, digunakan untuk komunikasi online.", img: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTgg2zl2GHgBM5fF_SaIc1O97cByqYjIq-3gq55nuiH9A&s=10" },
+  { no: 10, name: "FLASHDISK",      desc: "Menyimpan dan memindahkan data dengan mudah.", img: "https://www.unbox.id/wp-content/uploads/2017/08/FD.jpg" }
 ];
 
 // Peran brainware (tab SW & BW)
