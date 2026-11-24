@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pengenalan Dasar Sistem Komputer - Informatika Kelas VII SMP/MTs</title>
-
   <!-- Tailwind CSS CDN (butuh internet) -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="js/tailwind-config.js"></script>
@@ -537,7 +536,6 @@
         </div>
 
         <!-- Tugas mini -->
-       
 <div id="sim-proyek" class="hidden space-y-3.5">
 
   <!-- Aktivitas observasi -->
@@ -635,15 +633,12 @@
       <i class="fas fa-file-pdf"></i>
       Simpan dan Unduh PDF
     </button>
-
     <p
       id="activity-save-status"
       class="hidden text-center text-[11px] font-bold text-emerald-600"
     ></p>
   </div>
-
 </div>
-
         <button onclick="navigateTo('kuis')" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 rounded-2xl shadow-md text-xs transition flex items-center justify-center gap-2">
           Kerjakan Latihan 10 Soal Pilihan Ganda <i class="fas fa-arrow-right"></i>
         </button>
@@ -808,5 +803,177 @@
   <script src="js/games.js"></script>
   <script src="js/quiz.js"></script>
   <script src="js/main.js"></script>
+
+  <script>
+async function saveStudentActivity() {
+
+    // Mengambil data observasi
+    const nama = document.getElementById("student-name").value.trim();
+
+    const hw1 = document.getElementById("mini-hw-1").value.trim();
+    const hw2 = document.getElementById("mini-hw-2").value.trim();
+    const hw3 = document.getElementById("mini-hw-3").value.trim();
+
+    // Mengambil data proyek
+    const komponen = document.getElementById("proj-comp-name").value.trim();
+    const deskripsi = document.getElementById("proj-comp-desc").value.trim();
+
+    const status = document.getElementById("activity-save-status");
+
+    // Validasi input
+    if (!nama || !hw1 || !hw2 || !hw3 || !komponen || !deskripsi) {
+        alert("Silakan lengkapi semua kolom terlebih dahulu!");
+        return;
+    }
+
+    // Memastikan library PDF tersedia
+    if (!window.jspdf) {
+        alert("Library PDF belum berhasil dimuat. Periksa koneksi internet.");
+        return;
+    }
+
+    // Membuat dokumen PDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Pengaturan dokumen
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    const contentWidth = pageWidth - (margin * 2);
+    let y = 20;
+
+    // Judul dokumen
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(16);
+    doc.text("HASIL AKTIVITAS PEMBELAJARAN", pageWidth / 2, y, {
+        align: "center"
+    });
+
+    y += 10;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text("Materi: Sistem Komputer dan Komponennya", pageWidth / 2, y, {
+        align: "center"
+    });
+
+    y += 12;
+
+    // Garis pembatas
+    doc.setDrawColor(100);
+    doc.line(margin, y, pageWidth - margin, y);
+
+    y += 12;
+
+    // Identitas siswa
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("A. IDENTITAS SISWA", margin, y);
+
+    y += 8;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+    doc.text("Nama Lengkap: " + nama, margin, y);
+
+    y += 13;
+
+    // Hasil observasi
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("B. HASIL OBSERVASI HARDWARE", margin, y);
+
+    y += 9;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+
+    const observasi = [hw1, hw2, hw3];
+
+    observasi.forEach((item, index) => {
+        const lines = doc.splitTextToSize(
+            (index + 1) + ". " + item,
+            contentWidth
+        );
+
+        doc.text(lines, margin, y);
+        y += (lines.length * 6) + 3;
+    });
+
+    y += 8;
+
+    // Proyek poster
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(12);
+    doc.text("C. PROYEK MINI: POSTER DIGITAL", margin, y);
+
+    y += 9;
+
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
+
+    doc.text("Komponen yang Dipilih:", margin, y);
+
+    y += 7;
+
+    const komponenLines = doc.splitTextToSize(
+        komponen,
+        contentWidth
+    );
+
+    doc.text(komponenLines, margin, y);
+
+    y += (komponenLines.length * 6) + 5;
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Rancangan Konsep Poster:", margin, y);
+
+    y += 7;
+
+    doc.setFont("helvetica", "normal");
+
+    const deskripsiLines = doc.splitTextToSize(
+        deskripsi,
+        contentWidth
+    );
+
+    // Memastikan teks tidak keluar halaman
+    deskripsiLines.forEach(line => {
+        if (y > 275) {
+            doc.addPage();
+            y = 20;
+        }
+
+        doc.text(line, margin, y);
+        y += 6;
+    });
+
+    // Tanggal pembuatan
+    y += 15;
+
+    if (y > 275) {
+        doc.addPage();
+        y = 20;
+    }
+
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.text(
+        "Dokumen dibuat secara otomatis melalui media pembelajaran digital.",
+        margin,
+        y
+    );
+
+    // Mengunduh PDF
+    const namaFile = nama
+        .replace(/[^a-zA-Z0-9]/g, "_");
+
+    doc.save("Hasil_Aktivitas_" + namaFile + ".pdf");
+
+    // Menampilkan status
+    status.textContent = "PDF berhasil dibuat dan diunduh!";
+    status.classList.remove("hidden");
+}
+</script>
 </body>
 </html>
